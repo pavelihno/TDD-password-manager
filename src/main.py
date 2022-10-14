@@ -12,6 +12,7 @@ Commands:
 3) Save password
 4) Delete password
 5) Delete all passwords
+6) Change password manager key
 ====================
     ''')
 
@@ -48,6 +49,14 @@ Password for '{login}' successfully deleted!
     ''')
 
 
+def print_password_manager_key_changed():
+    print(f'''
+====================
+Password manager key successfully changed!
+====================
+''')
+
+
 def get_login_from_user_input():
     return input('Enter login: ')
 
@@ -57,13 +66,18 @@ def get_password_from_user_input():
 
 
 def main():
-    password_manager = PasswordManager('../data/encrypted_passwords', '12345')
+    key = input('Enter password manager key: ')
+
+    password_manager = PasswordManager('../data/encrypted_passwords', key)
 
     print_commands()
 
     while True:
-        print('Enter command number: ')
-        command_number = int(input())
+
+        try:
+            command_number = int(input('Enter command number: '))
+        except ValueError:
+            command_number = 0
 
         if command_number == 1:
             passwords = password_manager.get_passwords()
@@ -87,6 +101,11 @@ def main():
         elif command_number == 5:
             password_manager.delete_passwords()
             print_passwords_deleted()
+
+        elif command_number == 6:
+            key = input('Enter password manager key: ')
+            password_manager.set_key(key)
+            print_password_manager_key_changed()
 
         else:
             print_commands()
