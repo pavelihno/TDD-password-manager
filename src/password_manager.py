@@ -1,13 +1,34 @@
+import base64
 import json
+import os
 
 from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+ENCODING = 'utf-8'
 
 
 class PasswordManager:
 
     def __init__(self, password_json_file_path, key):
         self.password_json_file_path = password_json_file_path
-        self.key = key
+        self.key = None
+
+        self.set_key(key)
+
+    def set_key(self, key):
+        salt = os.urandom(16)
+        backend = default_backend()
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+            backend=backend
+        )
+        self.key = base64.urlsafe_b64encode(kdf.derive(key.encode(ENCODING)))
 
     def _encrypt_passwords(self, passwords):
         with open(self.password_json_file_path, 'wb') as password_json_file:
