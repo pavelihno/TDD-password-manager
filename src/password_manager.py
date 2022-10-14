@@ -18,8 +18,19 @@ class PasswordManager:
         self.set_key(key)
 
     def set_key(self, key):
-        passwords = self.get_passwords() if self.key else {}
+        old_key = self.key
+        self.key = self._encrypt_key(key)
+        passwords = self.get_passwords()
 
+        if not passwords and old_key:
+            self.key = old_key
+            passwords = self.get_passwords()
+            self.key = self._encrypt_key(key)
+
+        self._encrypt_passwords(passwords)
+
+    @staticmethod
+    def _encrypt_key(key):
         backend = default_backend()
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -28,9 +39,7 @@ class PasswordManager:
             iterations=100000,
             backend=backend
         )
-        self.key = base64.urlsafe_b64encode(kdf.derive(key.encode(ENCODING)))
-
-        self._encrypt_passwords(passwords)
+        return base64.urlsafe_b64encode(kdf.derive(key.encode(ENCODING)))
 
     def _encrypt_passwords(self, passwords):
         with open(self.password_json_file_path, 'wb') as password_json_file:
