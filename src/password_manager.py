@@ -1,7 +1,7 @@
 import base64
 import json
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -42,7 +42,7 @@ class PasswordManager:
                     return json.loads(fernet.decrypt(text.decode(ENCODING)))
                 else:
                     return {}
-        except FileNotFoundError:
+        except (FileNotFoundError, InvalidToken):
             return {}
 
     def save_password(self, login, password):
@@ -57,7 +57,10 @@ class PasswordManager:
         return self._decrypt_passwords()
 
     def delete_password(self, login):
-        pass
+        passwords = self.get_passwords()
+        deleted_password = passwords.pop(login, None)
+        self._encrypt_passwords(passwords)
+        return deleted_password
 
     def delete_passwords(self):
         open(self.password_json_file_path, 'w').close()
