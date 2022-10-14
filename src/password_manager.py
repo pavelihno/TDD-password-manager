@@ -1,6 +1,5 @@
 import base64
 import json
-import os
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
@@ -19,12 +18,11 @@ class PasswordManager:
         self.set_key(key)
 
     def set_key(self, key):
-        salt = os.urandom(16)
         backend = default_backend()
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=salt,
+            salt=b'salt',
             iterations=100000,
             backend=backend
         )
@@ -36,13 +34,16 @@ class PasswordManager:
             password_json_file.write(fernet.encrypt(json.dumps(passwords).encode(ENCODING)))
 
     def _decrypt_passwords(self):
-        with open(self.password_json_file_path, 'rb') as password_json_file:
-            fernet = Fernet(self.key)
-            text = password_json_file.read()
-            if text:
-                return json.loads(fernet.decrypt(text.decode(ENCODING)))
-            else:
-                return {}
+        try:
+            with open(self.password_json_file_path, 'rb') as password_json_file:
+                fernet = Fernet(self.key)
+                text = password_json_file.read()
+                if text:
+                    return json.loads(fernet.decrypt(text.decode(ENCODING)))
+                else:
+                    return {}
+        except FileNotFoundError:
+            return {}
 
     def save_password(self, login, password):
         passwords = self.get_passwords()
