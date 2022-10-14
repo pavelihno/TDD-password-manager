@@ -18,16 +18,7 @@ class PasswordManager:
         self.set_key(key)
 
     def set_key(self, key):
-        old_key = self.key
         self.key = self._encrypt_key(key)
-        passwords = self.get_passwords()
-
-        if not passwords and old_key:
-            self.key = old_key
-            passwords = self.get_passwords()
-            self.key = self._encrypt_key(key)
-
-        self._encrypt_passwords(passwords)
 
     @staticmethod
     def _encrypt_key(key):
