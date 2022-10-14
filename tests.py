@@ -1,12 +1,14 @@
 import unittest
 
+from src.password_manager import PasswordManager
+
 
 class PasswordManagerTest(unittest.TestCase):
 
     def setUp(self):
         password_manager_key = 'Ar1Vider4I'
 
-        self.password_json_file_path = 'data/encrypted_password.json'
+        self.password_json_file_path = 'data/encrypted_password_test.json'
         self.login = 'pavelihno'
         self.password = 'test_password'
         self.password_manager = PasswordManager(self.password_json_file_path, password_manager_key)
@@ -52,14 +54,14 @@ class PasswordManagerTest(unittest.TestCase):
     def test_getting_password_by_non_existing_login_when_wrong_password_manager_key_entered(self):
         self.password_manager.delete_passwords()
 
-        self.password_manager.key = 'wrong_key'
+        self.password_manager.set_key('wrong_key')
 
         self.assertEqual(self.password_manager.get_password(self.login), None)
 
     def test_getting_password_by_existing_login_when_wrong_password_manager_key_entered(self):
         self.password_manager.delete_passwords()
 
-        self.password_manager.key = 'wrong_key'
+        self.password_manager.set_key('wrong_key')
 
         self.assertEqual(self.password_manager.get_password(self.login), None)
 
