@@ -33,14 +33,16 @@ class PasswordManager:
     def _encrypt_passwords(self, passwords):
         with open(self.password_json_file_path, 'wb') as password_json_file:
             fernet = Fernet(self.key)
-            password_json_file.write(fernet.encrypt(bytes(json.dumps(passwords))))
+            password_json_file.write(fernet.encrypt(json.dumps(passwords).encode(ENCODING)))
 
     def _decrypt_passwords(self):
         with open(self.password_json_file_path, 'rb') as password_json_file:
             fernet = Fernet(self.key)
-            passwords = json.loads(fernet.decrypt(str(password_json_file.read())))
-
-            return passwords
+            text = password_json_file.read()
+            if text:
+                return json.loads(fernet.decrypt(text.decode(ENCODING)))
+            else:
+                return {}
 
     def save_password(self, login, password):
         pass
