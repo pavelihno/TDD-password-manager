@@ -45,19 +45,21 @@ class PasswordManager:
                 return {}
 
     def save_password(self, login, password):
-        pass
+        passwords = self.get_passwords()
+        passwords[login] = password
+        self._encrypt_passwords(passwords)
 
     def get_password(self, login):
-        pass
+        return self.get_passwords().get(login)
 
     def get_passwords(self):
-        pass
+        return self._decrypt_passwords()
 
     def delete_password(self, login):
         pass
 
     def delete_passwords(self):
-        pass
+        open(self.password_json_file_path, 'w').close()
 
 
 
